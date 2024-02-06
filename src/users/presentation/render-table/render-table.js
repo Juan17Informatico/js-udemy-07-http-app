@@ -4,8 +4,8 @@ import "./render-table.css";
 let table;
 
 const createTable = () => {
-    const table = document.createElement('table');
-    const tableHeaders = document.createElement('thead');
+    const table = document.createElement("table");
+    const tableHeaders = document.createElement("thead");
     tableHeaders.innerHTML = `
         <tr>
             <th>#ID</th>
@@ -17,7 +17,7 @@ const createTable = () => {
         </tr>
     `;
 
-    const tableBody = document.createElement('tbody');
+    const tableBody = document.createElement("tbody");
     table.append(tableHeaders, tableBody);
     return table;
 };
@@ -35,8 +35,8 @@ export const renderTable = (element) => {
         //TODO: listeners a la table
     }
 
-    let tableHTML = '';
-    users.forEach(user => {
+    let tableHTML = "";
+    users.forEach((user) => {
         tableHTML += `
             <tr>
                 <td>${user.id}</td>
@@ -53,7 +53,5 @@ export const renderTable = (element) => {
         `;
     });
 
-    table.querySelector('tbody').innerHTML = tableHTML;
-    
-
+    table.querySelector("tbody").innerHTML = tableHTML;
 };
