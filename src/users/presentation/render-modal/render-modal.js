@@ -1,22 +1,50 @@
 import html from "./render-modal.html?raw";
 import "./render-modal.css";
-let modal, form;
+import "../../models/user";
+import { getUserById } from "../../use-cases/get-user-by-id";
 
-//TODO: cargar usuario por id
-export const showModal = () => {
+let modal, form;
+let loadedUser = {};
+/**
+ *
+ * @param {String|Number} id
+ */
+export const showModal = async (id) => {
     modal?.classList.remove("hide-modal");
+    loadedUser = {};
+
+    if (!id) return;
+    const user = await getUserById(id);
+    
+    setFormValues(user);
 };
 
 export const hideModal = () => {
-    //TODO: reset del fomulario
     modal?.classList.add("hide-modal");
+    form?.reset();
+};
+
+/**
+ *
+ * @param {User} user
+ */
+const setFormValues = (user) => {
+
+    form.querySelector('[name="firstName"]').value = user.firstName;
+    form.querySelector('[name="lastName"]').value = user.lastName;
+    form.querySelector('[name="balance"]').value = user.balance;
+    form.querySelector('[name="isActive"]').checked = user.isActive;
+
+    loadedUser = user;
+
 };
 
 /**
  *
  * @param {HTMLDivElement} element
+ * @param {(UserLike) => Promise <void>} callback
  */
-export const renderModal = (element) => {
+export const renderModal = (element, callback) => {
     if (modal) return;
 
     modal = document.createElement("div");
@@ -31,10 +59,33 @@ export const renderModal = (element) => {
         }
     });
 
-    form.addEventListener("submit", (e) => {
-        event.preventDefault();
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-        console.log('Formulario enviado');
+        const formData = new FormData(form);
+        // console.log(formData);
+        const userLike = {...loadedUser};
+
+        for (const [key, value] of formData) {
+            if (key === "balance") {
+                userLike[key] = +value;
+                continue;
+            }
+
+            if (key === "isActive") {
+                userLike[key] = value === "on" ? true : false;
+                continue;
+            }
+
+            if (!userLike.hasOwnProperty("isActive")) {
+                userLike["isActive"] = false;
+            }
+
+            userLike[key] = value;
+        }
+        await callback(userLike);
+
+        hideModal();
     });
 
     element.append(modal);
