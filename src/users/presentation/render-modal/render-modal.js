@@ -66,6 +66,10 @@ export const renderModal = (element, callback) => {
         // console.log(formData);
         const userLike = {...loadedUser};
 
+        if(!formData.get('isActive')){
+            formData.append('isActive', 'off');
+        }
+
         for (const [key, value] of formData) {
             if (key === "balance") {
                 userLike[key] = +value;

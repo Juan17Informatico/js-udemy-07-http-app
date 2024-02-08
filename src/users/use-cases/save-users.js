@@ -1,45 +1,59 @@
+import { localhostUserToModel } from "../mappers/localhost-user.mapper";
 import { userModelToLocalhost } from "../mappers/user-to-localhost.mapper";
-import { User } from "../models/user"
+import { User } from "../models/user";
 
 /**
- * 
- * @param {Like<User>} userLike 
+ *
+ * @param {Like<User>} userLike
  */
-export const saveUser = async(userLike) => {
-
+export const saveUser = async (userLike) => {
     const user = new User(userLike);
-    
-    if(!user.firstName || !user.lastName)
-        throw "First and lastnme are required";
-    
-    const userToSave = userModelToLocalhost(user);
 
-    if(user.id){
-        throw 'No implementada la actualización';
-        return;
+    if (!user.firstName || !user.lastName) throw "First and lastnme are required";
+
+    const userToSave = userModelToLocalhost(user);
+    let userUpdated;
+    if (user.id) {
+        userUpdated = await updatedUser(userToSave);
+    } else {
+        userUpdated = await createUser(userToSave);
     }
 
-    const updatedUser = await createUser(userToSave);
-
-    return updatedUser;
-}
+    return localhostUserToModel(userUpdated);
+};
 
 /**
  * @param {Like<User>} user
  */
-const createUser = async( user ) => {
-
+const createUser = async (user) => {
     const url = `${import.meta.env.VITE_BASE_URL}/users`;
-    const res = await fetch(url,{
-        method: 'POST',
+    const res = await fetch(url, {
+        method: "POST",
         body: JSON.stringify(user),
         headers: {
-            'Content-Type': 'application/json',
-        }
+            "Content-Type": "application/json",
+        },
     });
 
     const newUser = await res.json();
-    console.log({newUser});
+    console.log({ newUser });
     return newUser;
+};
 
-}
+/**
+ * @param {Like<User>} user
+ */
+const updatedUser = async (user) => {
+    const url = `${import.meta.env.VITE_BASE_URL}/users/${user.id}`;
+    const res = await fetch(url, {
+        method: "PATCH",
+        body: JSON.stringify(user),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    const updatedUser = await res.json();
+    console.log({ updatedUser });
+    return updatedUser;
+};
